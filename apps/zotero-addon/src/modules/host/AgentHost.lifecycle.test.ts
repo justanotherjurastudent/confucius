@@ -2833,7 +2833,8 @@ it("requestToolApproval builds async organizer review with outline numbering and
       { tag: "★outline" },
       { tag: "#flexannotate-outline-COL_1" },
     ],
-    getNote: () => "<h1>1 Einleitung</h1><h2>1.1 Relevanz</h2><h1>2 Methode</h1>",
+    getNote: () =>
+      "<h1>1 Einleitung</h1><h2>1.1 Relevanz</h2><h1>2 Methode</h1>",
   };
 
   const annotationItem = {
@@ -2928,7 +2929,6 @@ it("requestToolApproval builds async organizer review with outline numbering and
         },
       ],
     }),
-    getOutlineCache: () => undefined,
   };
 
   const approvalPromise = (host as any).requestToolApproval(

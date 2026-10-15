@@ -4165,17 +4165,8 @@ export class AgentHost {
     }
 
     try {
-      let cached = this.tools?.getOutlineCache?.(libraryID, colRef);
-      if (!cached && collectionKey) {
-        cached = this.tools?.getOutlineCache?.(libraryID, collectionKey);
-      }
-      if (!cached && topmostKey) {
-        cached = this.tools?.getOutlineCache?.(libraryID, topmostKey);
-      }
-      if (cached) {
-        roots = cached.roots;
-        outlineHeadings = cached.headings;
-      }
+      // Read the outline fresh from the plugin interface (or storage note);
+      // there is no outline cache, so each tool call reflects current state.
       if (
         !outlineHeadings.length &&
         typeof this.tools?.resolveOutline === "function"
@@ -4206,30 +4197,6 @@ export class AgentHost {
         if (note) {
           roots = parseOutline(note.getNote?.() || "");
           outlineHeadings = flattenOutline(roots);
-          if (topmostKey) {
-            this.tools?.cacheOutline?.(
-              libraryID,
-              topmostKey,
-              roots,
-              outlineHeadings,
-            );
-          }
-          if (collectionKey) {
-            this.tools?.cacheOutline?.(
-              libraryID,
-              collectionKey,
-              roots,
-              outlineHeadings,
-            );
-          }
-          if (colRef) {
-            this.tools?.cacheOutline?.(
-              libraryID,
-              colRef,
-              roots,
-              outlineHeadings,
-            );
-          }
         }
       }
       if (outlineHeadings && outlineHeadings.length > 0) {
@@ -4283,7 +4250,10 @@ export class AgentHost {
               : null);
           if (item === false) item = null;
 
-          if (!item && typeof (Zotero.Libraries as any)?.getAll === "function") {
+          if (
+            !item &&
+            typeof (Zotero.Libraries as any)?.getAll === "function"
+          ) {
             for (const lib of (Zotero.Libraries as any).getAll()) {
               if (lib.libraryID === libraryID) continue;
               const cand =
@@ -4345,7 +4315,9 @@ export class AgentHost {
                     const workParentID = (att as any).parentItemID;
                     if (workParentID) {
                       work =
-                        (await (Zotero.Items as any).getAsync?.(workParentID)) ||
+                        (await (Zotero.Items as any).getAsync?.(
+                          workParentID,
+                        )) ||
                         (typeof (Zotero.Items as any).get === "function"
                           ? (Zotero.Items as any).get(workParentID)
                           : null);
